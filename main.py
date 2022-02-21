@@ -2,6 +2,7 @@ import backtracking
 import branch_and_bound
 import hillclimbing
 import simulated_annealing
+import genetic
 
 if __name__ == '__main__':
     N = int(input("Enter size of N: "))
@@ -15,5 +16,6 @@ if __name__ == '__main__':
         2 : branch_and_bound.BNB(N),
 #         3 : hillclimbing.hillclimbing(N),
         4 : simulated_annealing.SA(N),
+        5 : genetic.geneticAlgo(N),
 
     }[algoNumber]
