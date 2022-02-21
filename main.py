@@ -1,16 +1,19 @@
-# This is a sample Python script.
+import backtracking
+import branch_and_bound
+import hillclimbing
+import simulated_annealing
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    N = int(input("Enter size of N: "))
+    print("\nChoose from menu: \n1.backtracking\n2.branch and bound\n3.hillclimbing\n4.simulated annealing\n")
+    algoNumber = input("Enter algo number: ")
+#     N = 8
+#     algoNumber = 1
+#     sa.simulated_annealing(N)
+    algoDic = {
+        1 : backtracking.backtracking(N),
+        2 : branch_and_bound.BNB(N),
+#         3 : hillclimbing.hillclimbing(N),
+        4 : simulated_annealing.SA(N),
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    }[algoNumber]
