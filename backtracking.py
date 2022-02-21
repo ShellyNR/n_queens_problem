@@ -42,13 +42,12 @@ def solveNQUtil(N, board, col, its):
 
 def backtracking(N):
     board = [[0 for _ in range(N)] for _ in range(N)]
-
     sol, iterations = solveNQUtil(board, 0, its)
     if (sol == False):
         # if (solveNQUtil(N, board, 0) == False):
         print("Solution does not exist")
         print("iterations:", iterations)
-        return False
+        exit()
     printSolution(board, N)
     print("iterations:", iterations)
-    return True
+    exit()
