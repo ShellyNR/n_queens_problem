@@ -53,6 +53,15 @@ def cost(chess_board):
 
 
 def simulatedAnnealing(N):
+    if N == 1:
+        print("[1]")
+        print("iter counter: 1")
+        return
+    if N == 2 or N==3:
+        print("Failed")
+        return
+
+    threshold_of_iter = 15000
     solution_found = False
     answer = create_board(N)
     cost_answer = cost(answer)
@@ -68,7 +77,10 @@ def simulatedAnnealing(N):
             index_2 = random.randrange(0, N - 1)
             if index_1 != index_2:
                 break
-        successor[index_1], successor[index_2] = successor[index_2], successor[index_1]  # swap two chosen queens
+        if counter == threshold_of_iter:
+            simulatedAnnealing(N)
+            return
+        successor[index_1], successor[index_2] = successor[index_2], successor[index_1]
         delta = cost(successor) - cost_answer
         if delta < 0 or random.uniform(0, 1) < exp(-delta / t):
             answer = deepcopy(successor)
