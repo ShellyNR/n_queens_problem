@@ -6,7 +6,7 @@ from copy import deepcopy
 def create_board(N):
     chess_board = {}
     temp = list(range(N))
-    random.shuffle(temp)  # shuffle to make sure it is random
+    random.shuffle(temp)
     column = 0
 
     while len(temp) > 0:
@@ -51,7 +51,6 @@ def cost(chess_board):
 
     return threat
 
-
 def simulatedAnnealing(N):
     if N == 1:
         print("[1]")
@@ -61,35 +60,39 @@ def simulatedAnnealing(N):
         print("Failed")
         return
 
-    threshold_of_iter = 15000
+    threshold_of_iter = N * 200
     solution_found = False
     answer = create_board(N)
     cost_answer = cost(answer)
     counter = 0
-    t = 4000
-    sch = 0.99
-    while t > 0:
+    T = 4000
+    d = 0.99
+    while T > 0:
         counter += 1
-        t *= sch
+        T *= d
         successor = deepcopy(answer)
         while True:
             index_1 = random.randrange(0, N - 1)
             index_2 = random.randrange(0, N - 1)
             if index_1 != index_2:
                 break
+
         if counter == threshold_of_iter:
-            simulatedAnnealing(N)
-            return
+            print("again")
+            return simulatedAnnealing(N)
+
         successor[index_1], successor[index_2] = successor[index_2], successor[index_1]
         delta = cost(successor) - cost_answer
-        if delta < 0 or random.uniform(0, 1) < exp(-delta / t):
+        if delta < 0 or random.uniform(0, 1) < exp(-delta / T):
             answer = deepcopy(successor)
             cost_answer = cost(answer)
+
         if cost_answer == 0:
             solution_found = True
-            print_chess_board(answer,N)
-            print("iter counter: " + str(counter))
-            break
+            # print_chess_board(answer,N)
+            # print("iter counter: " + str(counter))
+            return counter
+
     if solution_found is False:
         print("Failed")
 
@@ -102,6 +105,7 @@ def print_chess_board(board, N):
 
 def SA(N):
     start = time.time()
-    simulatedAnnealing(N)
-    print("Runtime in second:", time.time() - start)
-    exit()
+    iter_counter = simulatedAnnealing(N)
+    duration = time.time() - start
+    print("SA for " + str(N) + " runtime in second:", duration)
+    return duration,iter_counter
