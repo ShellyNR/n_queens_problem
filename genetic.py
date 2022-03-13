@@ -87,22 +87,16 @@ def geneticAlgo(N,pop_size,mut_prob):
         population = change_population(maxFitness,population, fitness,mut_prob)
         counter += 1
         if counter == threshold_of_iter:
-            print("again")
+            print("Failed")
             return geneticAlgo(N, pop_size,mut_prob)
-            # print("Failed")
-            # return 0
-
 
     for chrom in population:
         if fitness(maxFitness,chrom) == maxFitness:
-            # chrom_out = chrom
-            # board = create_final_board(nq, chrom_out)
-            # print_board(board)
-            # print("iter counter {}".format(counter))
-
+            chrom_out = chrom
+            board = create_final_board(nq, chrom_out)
+            print_board(board)
+            print("iter counter {}".format(counter))
             return counter
-            # print("Success")
-            # return 1
 
 def GA(N,pop_size,mut_prob):
     if N == 2 or N == 3:
@@ -113,4 +107,3 @@ def GA(N,pop_size,mut_prob):
     duration = time.time() - start
     print("pop size: " +str(pop_size) + " mut prob: " +  str(mut_prob) +" N is: " + str(N) + " Runtime in second: " + str(duration)+ " iter: "+ str(iter_counter))
     return duration,iter_counter
-    # return geneticAlgo(N,pop_size,mut_prob)
