@@ -117,6 +117,7 @@ def find_child(board, n, sideways_move=False):
             temp_board.extend(new_row)
             temp_board.extend(board[(row + 1) * n:])
             temp_h_cost = determine_h_cost(temp_board, n)
+            """
             if (sideways_move):
                 # if sideways moves are allowed, and the generated child heuristic cost is less than or equal to the current lowest heuristic cost, save generated child and update current lowest heuristic cost
                 if (temp_board != board):
@@ -132,10 +133,21 @@ def find_child(board, n, sideways_move=False):
                 if (temp_board != board) and (temp_h_cost < current_h_cost):
                     child = temp_board.copy()
                     current_h_cost = temp_h_cost
+            """
+            if (temp_board != board):
+                if (temp_h_cost < current_h_cost):
+                    child = temp_board.copy()
+                    current_h_cost = temp_h_cost
+                if (sideways_move) and (temp_h_cost == current_h_cost):
+                    # if sideways moves are allowed, and the generated child heuristic cost is less than or equal to the current lowest heuristic cost, save generated child and update current lowest heuristic cost
+                        same_cost_children.append(temp_board)
+    if (len(child) == 0) and (len(same_cost_children) != 0):
+        x = random.randint(0, len(same_cost_children) - 1)
+        child = same_cost_children[x]
     return child
 
 
-def steepest_hill_climbing(board, n, max_iterations=200, verbose=False):
+def steepest_hill_climbing(board, n, max_iterations=1000, verbose=False):
     ''' Steepest Hill climbing without sideways move, returns the current steps and whether the run succeeded or not '''
     steps = 0
     success = False
@@ -151,6 +163,8 @@ def steepest_hill_climbing(board, n, max_iterations=200, verbose=False):
 
         if (verbose and len(next_node) != 0):
             print_board(next_node, n)
+            #print("steps", steps)
+            #print("iters", i)
 
         # Update the steps taken for this run
         steps += 1
@@ -160,6 +174,8 @@ def steepest_hill_climbing(board, n, max_iterations=200, verbose=False):
             break
         # If we do not get a child, we cannot get a solution
         if (len(next_node) == 0):
+            #print("i", i)
+            #print ("F")
             break
         # Make the current child the next node
         current_board = next_node.copy()
@@ -237,6 +253,9 @@ def steepest_hill_climbing_with_random_restart_and_sideways_move(board, n, max_i
     success = False
     rr = 0
     current_board = board.copy()
+    best_board = board.copy()
+    best_score = determine_h_cost(best_board, n)
+    no_impro = 0
 
     if (verbose):
         print_board(current_board, n)
@@ -246,14 +265,21 @@ def steepest_hill_climbing_with_random_restart_and_sideways_move(board, n, max_i
         # Get the least heuristic child from the find child helper function
         next_node = find_child(current_board, n, sideways_move=True).copy()
 
+        if (determine_h_cost(current_board, n) == determine_h_cost(next_node, n)):
+            no_impro+=1
+
         if (verbose and len(next_node) != 0):
             print_board(next_node, n)
 
         # Update the steps taken for this run
         steps += 1
         # If we do not get a child, restart the search by generating another random board
-        if (len(next_node) == 0):
+        if (len(next_node) == 0) or (no_impro>=5):
+            if (determine_h_cost(current_board, n) > best_score):
+                best_score = determine_h_cost(current_board, n)
+                best_board = current_board
             next_node = generate_random_board(n)
+            no_impro = 0
             # Maintain count of restarts made
             rr += 1
         # If the current node's heuristic cost is zero, we have a solution
@@ -264,104 +290,123 @@ def steepest_hill_climbing_with_random_restart_and_sideways_move(board, n, max_i
         current_board = next_node.copy()
     return steps, success, rr
 
+iterations = 10
+def run_steepest_hill_climbing(N):
+    n = N
+    # Script for running functions
+    print('Steepest Hill Climbing:')
+    success_rate_steepest_hill_climbing = False
+    step_count_rate_steepest_hill_climbing_success = 0
+    step_count_rate_steepest_hill_climbing_failure = 0
 
-n = input_size_board()
-iterations = 200
+    for i in range(3):
+        print('Run ' + str(i + 1) + ':')
+        step_count, success = steepest_hill_climbing(generate_random_board(n), n,n**2, verbose=True)
+        if (success):
+            print('Success.')
+            step_count_rate_steepest_hill_climbing_success += step_count
+        else:
+            print('Failure.')
+            step_count_rate_steepest_hill_climbing_failure += step_count
+        success_rate_steepest_hill_climbing += success
+    for i in range(3, iterations):
 
-# Script for running functions
-print('Steepest Hill Climbing:')
-success_rate_steepest_hill_climbing = False
-step_count_rate_steepest_hill_climbing_success = 0
-step_count_rate_steepest_hill_climbing_failure = 0
-for i in range(3):
-    print('Run ' + str(i + 1) + ':')
-    step_count, success = steepest_hill_climbing(generate_random_board(n), n, verbose=True)
-    if (success):
-        print('Success.')
-        step_count_rate_steepest_hill_climbing_success += step_count
-    else:
-        print('Failure.')
-        step_count_rate_steepest_hill_climbing_failure += step_count
-    success_rate_steepest_hill_climbing += success
-for i in range(3, iterations):
-    step_count, success = steepest_hill_climbing(generate_random_board(n), n)
-    if (success):
-        step_count_rate_steepest_hill_climbing_success += step_count
-    else:
-        step_count_rate_steepest_hill_climbing_failure += step_count
-    success_rate_steepest_hill_climbing += success
-print('Success rate: ' + str(success_rate_steepest_hill_climbing / iterations))
-print('Failure rate: ' + str(1 - (success_rate_steepest_hill_climbing / iterations)))
-print('Average steps until success: ' + str(
-    step_count_rate_steepest_hill_climbing_success / success_rate_steepest_hill_climbing))
-print('Average steps until failure: ' + str(
-    step_count_rate_steepest_hill_climbing_failure / (iterations - success_rate_steepest_hill_climbing)))
+    #for i in range(iterations):
+        step_count, success = steepest_hill_climbing(generate_random_board(n), n,n**2)
+        if (success):
+            step_count_rate_steepest_hill_climbing_success += step_count
+        else:
+            step_count_rate_steepest_hill_climbing_failure += step_count
+        success_rate_steepest_hill_climbing += success
+    #print('Success rate: ' + str(success_rate_steepest_hill_climbing / iterations))
+    #print('Failure rate: ' + str(1 - (success_rate_steepest_hill_climbing / iterations)))
+    #print('Average steps until success: ' + str(
+    #    step_count_rate_steepest_hill_climbing_success / success_rate_steepest_hill_climbing))
+    #print('Average steps until failure: ' + str(
+    #    step_count_rate_steepest_hill_climbing_failure / (iterations - success_rate_steepest_hill_climbing)))
+    iter_succ = 0
+    if (success_rate_steepest_hill_climbing != 0):
+        iter_succ = (step_count_rate_steepest_hill_climbing_success/success_rate_steepest_hill_climbing)
+    return success_rate_steepest_hill_climbing,iter_succ
+    #return success_rate_steepest_hill_climbing, (step_count_rate_steepest_hill_climbing_success+step_count_rate_steepest_hill_climbing_failure/ iterations)
 
-print('Steepest Hill Climbing with Sideways Move:')
-success_rate_steepest_hill_climbing_sm = False
-step_count_rate_steepest_hill_climbing_success_sm = 0
-step_count_rate_steepest_hill_climbing_failure_sm = 0
-for i in range(3):
-    print('Run ' + str(i + 1) + ':')
-    step_count, success = steepest_hill_climbing_with_sideways_move(generate_random_board(n), n, verbose=True)
-    if (success):
-        print('Success.')
-        step_count_rate_steepest_hill_climbing_success_sm += step_count
-    else:
-        print('Failure.')
-        step_count_rate_steepest_hill_climbing_failure_sm += step_count
-    success_rate_steepest_hill_climbing_sm += success
-for i in range(3, iterations):
-    step_count, success = steepest_hill_climbing_with_sideways_move(generate_random_board(n), n)
-    if (success):
-        step_count_rate_steepest_hill_climbing_success_sm += step_count
-    else:
-        step_count_rate_steepest_hill_climbing_failure_sm += step_count
-    success_rate_steepest_hill_climbing_sm += success
-print('Success rate: ' + str(success_rate_steepest_hill_climbing_sm / iterations))
-print('Failure rate: ' + str(1 - (success_rate_steepest_hill_climbing_sm / iterations)))
-print('Average steps until success: ' + str(
-    step_count_rate_steepest_hill_climbing_success_sm / success_rate_steepest_hill_climbing_sm))
-print('Average steps until failure: ' + str(
-    step_count_rate_steepest_hill_climbing_failure_sm / (iterations - success_rate_steepest_hill_climbing_sm)))
 
-print('Steepest Hill Climbing with Random Restart:')
-success_rate_steepest_hill_climbing_rr = False
-step_count_rate_steepest_hill_climbing_success_rr = 0
-step_count_rate_steepest_hill_climbing_failure_rr = 0
-random_restarts = 0
-for i in range(iterations):
-    step_count, success, rr = steepest_hill_climbing_with_random_restart(generate_random_board(n), n)
-    random_restarts += rr
-    if (success):
-        print('Success.')
-        step_count_rate_steepest_hill_climbing_success_rr += step_count
-    else:
-        print('Failure.')
-        step_count_rate_steepest_hill_climbing_failure_rr += step_count
-    success_rate_steepest_hill_climbing_rr += success
-print('Success rate: ' + str(success_rate_steepest_hill_climbing_rr / iterations))
-print('Average steps taken: ' + str(
-    step_count_rate_steepest_hill_climbing_success_rr / success_rate_steepest_hill_climbing_rr))
-print('Random restarts required: ' + str(random_restarts))
+def run_steepest_hill_climbing_with_sideways_move(N):
+    n = N
+    print('Steepest Hill Climbing with Sideways Move:')
+    success_rate_steepest_hill_climbing_sm = False
+    step_count_rate_steepest_hill_climbing_success_sm = 0
+    step_count_rate_steepest_hill_climbing_failure_sm = 0
+    for i in range(3):
+        print('Run ' + str(i + 1) + ':')
+        step_count, success = steepest_hill_climbing_with_sideways_move(generate_random_board(n), n,n**2)
+        if (success):
+            print('Success.')
+            step_count_rate_steepest_hill_climbing_success_sm += step_count
+        else:
+            print('Failure.')
+            step_count_rate_steepest_hill_climbing_failure_sm += step_count
+        success_rate_steepest_hill_climbing_sm += success
+    for i in range(3, iterations):
+        step_count, success = steepest_hill_climbing_with_sideways_move(generate_random_board(n), n,n**2)
+        if (success):
+            step_count_rate_steepest_hill_climbing_success_sm += step_count
+        else:
+            step_count_rate_steepest_hill_climbing_failure_sm += step_count
+        success_rate_steepest_hill_climbing_sm += success
+        #return success_rate_steepest_hill_climbing_sm, (
+        #            step_count_rate_steepest_hill_climbing_success_sm + step_count_rate_steepest_hill_climbing_failure_sm / iterations)
+        iter_succ = 0
+        if (success_rate_steepest_hill_climbing_sm != 0):
+            iter_succ = (step_count_rate_steepest_hill_climbing_success_sm / success_rate_steepest_hill_climbing_sm)
+        return success_rate_steepest_hill_climbing_sm, iter_succ
 
-print('Steepest Hill Climbing with Random Restart and Sideways Move:')
-success_rate_steepest_hill_climbing_rrsm = False
-step_count_rate_steepest_hill_climbing_success_rrsm = 0
-step_count_rate_steepest_hill_climbing_failure_rrsm = 0
-random_restarts_sm = 0
-for i in range(iterations):
-    step_count, success, rr_sm = steepest_hill_climbing_with_random_restart_and_sideways_move(generate_random_board(n),
-                                                                                              n)
-    random_restarts_sm += rr_sm
-    if (success):
-        print('Success.')
-        step_count_rate_steepest_hill_climbing_success_rrsm += step_count
-    else:
-        print('Failure.')
-        step_count_rate_steepest_hill_climbing_failure_rrsm += step_count
-    success_rate_steepest_hill_climbing_rrsm += success
-print('Success rate: ' + str(success_rate_steepest_hill_climbing_rrsm / iterations))
-print('Average steps taken: ' + str(
-    step_count_rate_steepest_hill_climbing_success_rrsm / success_rate_steepest_hill_climbing_rrsm))
-print('Random restarts required with sideways move: ' + str(random_restarts_sm))
+
+def run_steepest_hill_climbing_with_random_restart(N):
+    n=N
+    print('Steepest Hill Climbing with Random Restart:')
+    success_rate_steepest_hill_climbing_rr = False
+    step_count_rate_steepest_hill_climbing_success_rr = 0
+    step_count_rate_steepest_hill_climbing_failure_rr = 0
+    random_restarts = 0
+    for i in range(iterations):
+        step_count, success, rr = steepest_hill_climbing_with_random_restart(generate_random_board(n), n, n**2)
+        random_restarts += rr
+        if (success):
+            print('Success.')
+            step_count_rate_steepest_hill_climbing_success_rr += step_count
+        else:
+            print('Failure.')
+            step_count_rate_steepest_hill_climbing_failure_rr += step_count
+        success_rate_steepest_hill_climbing_rr += success
+    #return success_rate_steepest_hill_climbing_rr, (
+    #        step_count_rate_steepest_hill_climbing_success_rr + step_count_rate_steepest_hill_climbing_failure_rr / iterations)
+    iter_succ = 0
+    if (success_rate_steepest_hill_climbing_rr != 0):
+        iter_succ = (step_count_rate_steepest_hill_climbing_success_rr / success_rate_steepest_hill_climbing_rr)
+    return success_rate_steepest_hill_climbing_rr, iter_succ
+
+def run_steepest_hill_climbing_with_random_restart_and_sideways_move(N):
+    n=N
+    print('Steepest Hill Climbing with Random Restart and Sideways Move:')
+    success_rate_steepest_hill_climbing_rrsm = False
+    step_count_rate_steepest_hill_climbing_success_rrsm = 0
+    step_count_rate_steepest_hill_climbing_failure_rrsm = 0
+    random_restarts_sm = 0
+    for i in range(iterations):
+        step_count, success, rr_sm = steepest_hill_climbing_with_random_restart_and_sideways_move(generate_random_board(n),
+                                                                                                  n, n**2)
+        random_restarts_sm += rr_sm
+        if (success):
+            print('Success.')
+            step_count_rate_steepest_hill_climbing_success_rrsm += step_count
+        else:
+            print('Failure.')
+            step_count_rate_steepest_hill_climbing_failure_rrsm += step_count
+        success_rate_steepest_hill_climbing_rrsm += success
+    #return success_rate_steepest_hill_climbing_rrsm, (
+    #        step_count_rate_steepest_hill_climbing_success_rrsm + step_count_rate_steepest_hill_climbing_failure_rrsm / iterations)
+    iter_succ = 0
+    if (success_rate_steepest_hill_climbing_rrsm != 0):
+        iter_succ = (step_count_rate_steepest_hill_climbing_success_rrsm / success_rate_steepest_hill_climbing_rrsm)
+    return success_rate_steepest_hill_climbing_rrsm, iter_succ
