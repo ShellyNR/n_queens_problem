@@ -2,18 +2,4 @@
 בעת הרצת main.py מופיע תפריט ובו ניתן לבחור N ואלגוריתם למציאת פיתרון, 
 והלוח שנמצא (אם נמצא) מודפס.
 לדוגמא:
-Enter size of N: 5
-
-
-Choose from menu: 
-1.Backtracking Algorithm
-2.Branch And Bound
-3.Hill climbing
-4.Simulated Annealing
-5.Genetic Algorithm
-Enter algo number: 1
-1 0 0 0 0 
-0 0 0 1 0 
-0 1 0 0 0 
-0 0 0 0 1 
-0 0 1 0 0 
+![image](https://user-images.githubusercontent.com/73890534/158260736-7333f81c-4a2c-41a6-8f3f-50716928096d.png)
