@@ -89,8 +89,8 @@ def simulatedAnnealing(N):
 
         if cost_answer == 0:
             solution_found = True
-            # print_chess_board(answer,N)
-            # print("iter counter: " + str(counter))
+            print_chess_board(answer,N)
+            print("iter counter: " + str(counter))
             return counter
 
     if solution_found is False:
