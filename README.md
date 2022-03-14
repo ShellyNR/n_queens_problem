@@ -4,6 +4,7 @@
 לדוגמא:
 Enter size of N: 5
 
+
 Choose from menu: 
 1.Backtracking Algorithm
 2.Branch And Bound
