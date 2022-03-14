@@ -274,7 +274,7 @@ def steepest_hill_climbing_with_random_restart_and_sideways_move(board, n, max_i
         # Update the steps taken for this run
         steps += 1
         # If we do not get a child, restart the search by generating another random board
-        if (len(next_node) == 0) or (no_impro>=5):
+        if (len(next_node) == 0) or (no_impro>=n):
             if (determine_h_cost(current_board, n) > best_score):
                 best_score = determine_h_cost(current_board, n)
                 best_board = current_board
@@ -290,7 +290,51 @@ def steepest_hill_climbing_with_random_restart_and_sideways_move(board, n, max_i
         current_board = next_node.copy()
     return steps, success, rr
 
-iterations = 10
+def best_board_hill_climbing_with_random_restart_and_sideways_move(board, n, max_iterations=200, verbose=False):
+    ''' Steepest Hill climbing with random restart and sideways move, returns the current steps and whether the run succeeded or not '''
+    steps = 0
+    success = False
+    rr = 0
+    current_board = board.copy()
+    best_board = board.copy()
+    best_score = determine_h_cost(best_board, n)
+    no_impro = 0
+
+    if (verbose):
+        print_board(current_board, n)
+
+    # Until maximum iterations are reached, search for a solution
+    for i in range(max_iterations):
+        # Get the least heuristic child from the find child helper function
+        next_node = find_child(current_board, n, sideways_move=True).copy()
+
+        if (determine_h_cost(current_board, n) == determine_h_cost(next_node, n)):
+            no_impro+=1
+
+        if (verbose and len(next_node) != 0):
+            print_board(next_node, n)
+
+        # Update the steps taken for this run
+        steps += 1
+        # If we do not get a child, restart the search by generating another random board
+        if (len(next_node) == 0) or (no_impro>=n):
+            if (determine_h_cost(current_board, n) > best_score):
+                best_score = determine_h_cost(current_board, n)
+                best_board = current_board
+            next_node = generate_random_board(n)
+            no_impro = 0
+            # Maintain count of restarts made
+            rr += 1
+        # If the current node's heuristic cost is zero, we have a solution
+        if (determine_h_cost(next_node, n) == 0):
+            best_board = next_node
+            success = True
+            break
+        # Make the current child the next node
+        current_board = next_node.copy()
+    return best_board
+
+iterations = 100
 def run_steepest_hill_climbing(N):
     n = N
     # Script for running functions
@@ -410,3 +454,8 @@ def run_steepest_hill_climbing_with_random_restart_and_sideways_move(N):
     if (success_rate_steepest_hill_climbing_rrsm != 0):
         iter_succ = (step_count_rate_steepest_hill_climbing_success_rrsm / success_rate_steepest_hill_climbing_rrsm)
     return success_rate_steepest_hill_climbing_rrsm, iter_succ
+
+def HC(N):
+    n = N
+    board = best_board_hill_climbing_with_random_restart_and_sideways_move(generate_random_board(n), n)
+    print_board(board, n)
